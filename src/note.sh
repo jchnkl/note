@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 DEBUG=${DEBUG:-0}
+
+LS=${LS:-tree --noreport}
 EDITOR=${EDITOR:-vi}
 
 GIT="git"
@@ -70,6 +72,9 @@ function sanity_check()
   if [ ! -x "$(which $GPG 2>/dev/null)" ]; then
     echo "Can't find $GPG in \$PATH"
     exit_error
+  fi
+  if [ ! -x "$(which $LS 2>/dev/null)" ]; then
+    LS="git ls-files"
   fi
 }
 
@@ -197,9 +202,9 @@ function cmd_ls()
   local fpath="$GIT_WORK_TREE/$1"
 
   if [ -z "$fpath" ]; then
-    $GIT ls-files
+    $LS
   elif [ -f "$fpath" -o -d "$fpath" ]; then
-    $GIT ls-files "$fpath"
+    $LS "$fpath"
   else
     echo "$fpath does not exist"
     exit_error
