@@ -61,6 +61,18 @@ EOF
   fi
 }
 
+function sanity_check()
+{
+  if [ ! -x "$(which $GIT 2>/dev/null)" ]; then
+    echo "Can't find $GIT in \$PATH"
+    exit_error
+  fi
+  if [ ! -x "$(which $GPG 2>/dev/null)" ]; then
+    echo "Can't find $GPG in \$PATH"
+    exit_error
+  fi
+}
+
 }
 
 function cmd_add()
@@ -125,6 +137,7 @@ export GIT_DIR="$GIT_WORK_TREE/.git"
 
 function main()
 {
+  sanity_check
   initialize
 
   case "$1" in
