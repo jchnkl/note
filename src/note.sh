@@ -73,17 +73,23 @@ function sanity_check()
   fi
 }
 
+function usage_common()
+{
+  echo "usage:"
+  echo -en "$ARGV0 "
+}
+
 ### PUBLIC CMDS
 
 function usage_add()
 {
-  echo "$ARGV0 add <note>"
+  echo "add <note>"
 }
 
 function cmd_add()
 {
   if [ -z "$1" ]; then
-    echo -n "usage: "
+    usage_common
     usage_add
     exit_error
   fi
@@ -110,13 +116,13 @@ function cmd_add()
 
 function usage_cat()
 {
-  echo "$ARGV0 cat <note>"
+  echo "cat <note>"
 }
 
 function cmd_cat()
 {
   if [ -z "$1" ]; then
-    echo -n "usage: "
+    usage_common
     usage_cat
     exit_error
   fi
@@ -146,7 +152,7 @@ function usage_edit()
 function cmd_edit()
 {
   if [ -z "$1" ]; then
-    echo -n "usage: "
+    usage_common
     usage_edit
     exit_error
   fi
