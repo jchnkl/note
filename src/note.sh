@@ -108,32 +108,6 @@ function cmd_add()
   $GIT commit -m "ADD:$note" 2>&1>/dev/null
 }
 
-function usage_rm()
-{
-  echo "$ARGV0 rm [-f] <note>"
-}
-
-function cmd_rm()
-{
-  if [ -z "$1" ]; then
-    echo -n "usage: "
-    usage_rm
-    exit_error
-  fi
-
-  local force=
-  local note=$1
-  local file="$GIT_WORK_TREE/$note"
-
-  $GIT rm $force "$file" 2>&1>/dev/null
-  $GIT commit -m "RM:$note" 2>&1>/dev/null
-}
-
-function cmd_mv()
-{
-  echo "$@"
-}
-
 function cmd_cp()
 {
   echo "$@"
@@ -165,17 +139,17 @@ function cmd_edit()
   $GIT commit -m "EDIT:$note" 2>&1>/dev/null
 }
 
-function cmd_ls()
-{
-  $GIT ls-files
-}
-
 function cmd_encrypt()
 {
   echo "$@"
 }
 
-function cmd_history()
+function cmd_find()
+{
+  echo "$@"
+}
+
+function cmd_grep()
 {
   echo "$@"
 }
@@ -190,9 +164,35 @@ function cmd_mv()
   echo "$@"
 }
 
-function cmd_grep()
+function cmd_ls()
+{
+  $GIT ls-files
+}
+
+function cmd_mv()
 {
   echo "$@"
+}
+
+function usage_rm()
+{
+  echo "$ARGV0 rm [-f] <note>"
+}
+
+function cmd_rm()
+{
+  if [ -z "$1" ]; then
+    echo -n "usage: "
+    usage_rm
+    exit_error
+  fi
+
+  local force=
+  local note=$1
+  local file="$GIT_WORK_TREE/$note"
+
+  $GIT rm $force "$file" 2>&1>/dev/null
+  $GIT commit -m "RM:$note" 2>&1>/dev/null
 }
 
 function usage()
@@ -225,15 +225,15 @@ function main()
 
   case "$1" in
     'add')     shift; cmd_add "$@"     ;;
-    'rm')      shift; cmd_rm "$@"      ;;
-    'mv')      shift; cmd_mv "$@"      ;;
     'cp')      shift; cmd_cp "$@"      ;;
     'edit')    shift; cmd_edit "$@"    ;;
-    'ls')      shift; cmd_ls "$@"      ;;
     'encrypt') shift; cmd_encrypt "$@" ;;
-    'history') shift; cmd_history "$@" ;;
     'find')    shift; cmd_find "$@"    ;;
     'grep')    shift; cmd_grep "$@"    ;;
+    'history') shift; cmd_history "$@" ;;
+    'ls')      shift; cmd_ls "$@"      ;;
+    'mv')      shift; cmd_mv "$@"      ;;
+    'rm')      shift; cmd_rm "$@"      ;;
     *)                usage            ;;
   esac
 }
