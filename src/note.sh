@@ -1,7 +1,23 @@
 #!/usr/bin/env bash
 
+DEBUG=${DEBUG:-0}
+
 GIT="git"
 GPG="gpg"
+
+function DBG_PRINT()
+{
+  if [ "$DEBUG" != "0" ]; then
+    echo "$@" 1>&2
+  fi
+}
+
+function DBG_STATUS()
+{
+  if [ "$DEBUG" != "0" ]; then
+    git status 1>&2
+  fi
+}
 
 function data_dir()
 {
