@@ -184,19 +184,28 @@ function cmd_grep()
   echo "$@"
 }
 
+function usage_ls()
+{
+  echo "ls [<path>]"
+}
+
 function cmd_ls()
 {
-  echo "$@"
+  local fpath="$GIT_WORK_TREE/$1"
+
+  if [ -z "$fpath" ]; then
+    $GIT ls-files
+  elif [ -f "$fpath" -o -d "$fpath" ]; then
+    $GIT ls-files "$fpath"
+  else
+    echo "$fpath does not exist"
+    exit_error
+  fi
 }
 
 function cmd_mv()
 {
   echo "$@"
-}
-
-function cmd_ls()
-{
-  $GIT ls-files
 }
 
 function cmd_mv()
