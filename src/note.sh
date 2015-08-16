@@ -140,6 +140,8 @@ function main()
   sanity_check
   initialize
 
+  DBG_STATUS
+
   case "$1" in
     'add')     shift; cmd_add "$@"     ;;
     'rm')      shift; cmd_rm "$@"      ;;
