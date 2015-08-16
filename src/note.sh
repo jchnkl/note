@@ -108,9 +108,25 @@ function cmd_add()
   $GIT commit -m "ADD:$note" 2>&1>/dev/null
 }
 
+function usage_rm()
+{
+  echo "$ARGV0 rm [-f] <note>"
+}
+
 function cmd_rm()
 {
-  echo "$@"
+  if [ -z "$1" ]; then
+    echo -n "usage: "
+    usage_rm
+    exit_error
+  fi
+
+  local force=
+  local note=$1
+  local file="$GIT_WORK_TREE/$note"
+
+  $GIT rm $force "$file" 2>&1>/dev/null
+  $GIT commit -m "RM:$note" 2>&1>/dev/null
 }
 
 function cmd_mv()
