@@ -197,8 +197,19 @@ function cmd_grep()
 
 function usage()
 {
-  cat <<- EOF
-  Usage: $ARGV0
+  cat << EOF
+  Usage:
+    $ARGV0 add
+    $ARGV0 cat
+    # $ARGV0 cp
+    $ARGV0 edit
+    # $ARGV0 encrypt
+    # $ARGV0 find
+    # $ARGV0 grep
+    # $ARGV0 history
+    $ARGV0 ls
+    # $ARGV0 mv
+    $ARGV0 rm
 EOF
 }
 
