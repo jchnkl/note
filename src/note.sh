@@ -73,11 +73,39 @@ function sanity_check()
   fi
 }
 
+### PUBLIC CMDS
+
+function usage_add()
+{
+  echo "$ARGV0 add <note>"
 }
 
 function cmd_add()
 {
-  echo "$@"
+  if [ -z "$1" ]; then
+    echo -n "usage: "
+    usage_add
+    exit_error
+  fi
+
+  local note="$1"
+  local file="$GIT_WORK_TREE/$note"
+
+  if [ -f "$file" ]; then
+    echo "$note already exists!"
+    exit_error
+  fi
+
+  shift
+
+  if read -t 0; then
+    cat > "$file"
+  else
+    echo "$*" > "$file"
+  fi
+
+  $GIT add "$file" 2>&1>/dev/null
+  $GIT commit -m "ADD:$note" 2>&1>/dev/null
 }
 
 function cmd_rm()
