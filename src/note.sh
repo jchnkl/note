@@ -112,6 +112,11 @@ function cmd_add()
 
   shift
 
+  if [ -d "$file" ]; then
+    echo "$dir/$note is a directory"
+    exit_error
+  fi
+
   if read -t 0; then
     cat > "$file"
   else
