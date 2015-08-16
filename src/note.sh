@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 DEBUG=${DEBUG:-0}
+EDITOR=${EDITOR:-vi}
 
 GIT="git"
 GPG="gpg"
