@@ -237,9 +237,6 @@ function usage()
 EOF
 }
 
-export GIT_WORK_TREE="$(data_dir)/notes"
-export GIT_DIR="$GIT_WORK_TREE/.git"
-
 function main()
 {
   sanity_check
@@ -263,6 +260,8 @@ function main()
   esac
 }
 
-ARGV0="${0##*/}"
+export ARGV0="${0##*/}"
+export GIT_WORK_TREE="$(data_dir)/notes"
+export GIT_DIR="$GIT_WORK_TREE/.git"
 
 main "$@"
