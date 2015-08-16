@@ -4,6 +4,7 @@ DEBUG=${DEBUG:-0}
 
 LS=${LS:-tree --noreport}
 EDITOR=${EDITOR:-vi}
+GETOPT=${GETOPT:-getopt}
 
 GIT="git"
 GPG="gpg"
@@ -76,6 +77,16 @@ function sanity_check()
   if [ ! -x "$(which $LS 2>/dev/null)" ]; then
     LS="git ls-files"
   fi
+}
+
+function check_sneaky_paths()
+{
+  local path
+  for path in "$@"; do
+    [[ $path =~ /\.\.$ || $path =~ ^\.\./ ||
+       $path =~ /\.\./ || $path =~ ^\.\.$ ]] &&
+      exit_error "sneaky path is sneaky"
+  done
 }
 
 function usage_common()
@@ -152,12 +163,32 @@ function cmd_cat()
 
 function usage_cp()
 {
-  echo "cp <source> <destination>"
+  echo "cp [-r] [-f] <source> <destination>"
 }
 
 function cmd_cp()
 {
-  if [ -z "$1" -o -z "$2" ]; then
+  local opts=
+  local force="-n"
+  local recursive=
+
+  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 cp" -- "$@")"
+
+  if [ $? -gt 0 ]; then
+    exit_error
+  fi
+
+  eval set -- "$opts"
+
+  while true; do
+    case "$1" in
+      -f|--force) force="-f"; shift ;;
+      -r|--recursive) recursive="-r"; shift ;;
+      --) shift; break ;;
+    esac
+  done
+
+  if [ ${#@} -ne 2 ]; then
     usage_common
     usage_cp
     exit_error
@@ -165,26 +196,22 @@ function cmd_cp()
 
   local src="$1"
   local dst="$2"
-  local src_dir="$(dirname $src)"
-  local src_note="$(basename $src)"
-  local src_file="$GIT_WORK_TREE/$src_dir/$src_note"
-  local dst_dir="$(dirname $dst)"
-  local dst_note="$(basename $dst)"
-  local dst_file="$GIT_WORK_TREE/$dst_dir/$dst_note"
 
-  if [ ! -f "$src_file" ]; then
-    exit_error "$src_dir/$src_note does not exist"
-  elif [ -f "$dst_file" ]; then
-    exit_error "$dst_dir/$dst_note exists, not overwriting"
+  check_sneaky_paths "$src"
+  check_sneaky_paths "$dst"
+
+  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
+
+  cp -v $force $recursive "$src" "$dst"
+
+  if [ $? -gt 0 ]; then
+    exit_error
   fi
 
-  if [ ! -d "$GIT_WORK_TREE/$dst_dir" ]; then
-    mkdir -p "$GIT_WORK_TREE/$dst_dir"
-  fi
+  popd 2>&1>/dev/null
 
-  cp "$src_file" "$dst_file" 2>&1>/dev/null
-  $GIT add "$dst_file" 2>&1>/dev/null
-  $GIT commit -m "CP:$src_dir/$src_note:$dst_dir/$dst_note" 2>&1>/dev/null
+  $GIT add "$dst" 2>&1>/dev/null
+  $GIT commit -m "CP:$src:$dst" 2>&1>/dev/null
 }
 
 function usage_edit()
