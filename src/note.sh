@@ -150,9 +150,41 @@ function cmd_cat()
   cat "$file"
 }
 
+function usage_cp()
+{
+  echo "cp <source> <destination>"
+}
+
 function cmd_cp()
 {
-  echo "$@"
+  if [ -z "$1" -o -z "$2" ]; then
+    usage_common
+    usage_cp
+    exit_error
+  fi
+
+  local src="$1"
+  local dst="$2"
+  local src_dir="$(dirname $src)"
+  local src_note="$(basename $src)"
+  local src_file="$GIT_WORK_TREE/$src_dir/$src_note"
+  local dst_dir="$(dirname $dst)"
+  local dst_note="$(basename $dst)"
+  local dst_file="$GIT_WORK_TREE/$dst_dir/$dst_note"
+
+  if [ ! -f "$src_file" ]; then
+    exit_error "$src_dir/$src_note does not exist"
+  elif [ -f "$dst_file" ]; then
+    exit_error "$dst_dir/$dst_note exists, not overwriting"
+  fi
+
+  if [ ! -d "$GIT_WORK_TREE/$dst_dir" ]; then
+    mkdir -p "$GIT_WORK_TREE/$dst_dir"
+  fi
+
+  cp "$src_file" "$dst_file" 2>&1>/dev/null
+  $GIT add "$dst_file" 2>&1>/dev/null
+  $GIT commit -m "CP:$src_dir/$src_note:$dst_dir/$dst_note" 2>&1>/dev/null
 }
 
 function usage_edit()
