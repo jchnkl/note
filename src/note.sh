@@ -94,13 +94,16 @@ function cmd_add()
     exit_error
   fi
 
-  local note="$1"
-  local file="$GIT_WORK_TREE/$note"
+  local dir="$(dirname $1)"
+  local note="$(basename $1)"
+  local file="$GIT_WORK_TREE/$dir/$note"
 
   if [ -f "$file" ]; then
     echo "$note already exists!"
     exit_error
   fi
+
+  mkdir -p "$GIT_WORK_TREE/$dir"
 
   shift
 
