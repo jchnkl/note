@@ -1,8 +1,49 @@
 #!/usr/bin/env bash
 
-function cmd_init()
+GIT="git"
+GPG="gpg"
+
+function data_dir()
 {
-  echo "$@"
+  local DATA_HOME="$XDG_DATA_HOME"
+
+  if [ -z "$DATA_HOME" ]; then
+    DATA_HOME="$HOME/.local/share"
+  fi
+
+  echo "$DATA_HOME"
+}
+
+function exit_error()
+{
+  exit 1
+}
+
+function exit_success()
+{
+  exit 0
+}
+
+function initialize()
+{
+  if [ ! -d "$GIT_DIR" ]; then
+    git init "$GIT_DIR" 1>/dev/null 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+      echo -e "Initialized data directory\n"
+    else
+      echo -e "Error: data directory was not initialized properly\n"
+      exit_error
+    fi
+
+    cat > "$GIT_WORK_TREE/.gitignore" << EOF
+*.gpg
+.gitignore
+EOF
+
+  fi
+}
+
 }
 
 function cmd_add()
@@ -62,10 +103,14 @@ function usage()
 EOF
 }
 
+export GIT_WORK_TREE="$(data_dir)/notes"
+export GIT_DIR="$GIT_WORK_TREE/.git"
+
 function main()
 {
+  initialize
+
   case "$1" in
-    'init')    shift; cmd_init "$@"    ;;
     'add')     shift; cmd_add "$@"     ;;
     'rm')      shift; cmd_rm "$@"      ;;
     'mv')      shift; cmd_mv "$@"      ;;
