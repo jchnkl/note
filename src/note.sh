@@ -139,14 +139,35 @@ function cmd_cp()
   echo "$@"
 }
 
+function usage_edit()
+{
+  echo "edit <note>"
+  echo "<note> will be created automatically if it does not exist"
+}
+
 function cmd_edit()
 {
-  echo "$@"
+  if [ -z "$1" ]; then
+    echo -n "usage: "
+    usage_edit
+    exit_error
+  fi
+
+  local note="$1"
+  local file="$GIT_WORK_TREE/$note"
+
+  if [ ! -f "$file" ]; then
+    cmd_add "$file"
+  fi
+
+  $EDITOR "$file"
+  $GIT add "$file" 2>&1>/dev/null
+  $GIT commit -m "EDIT:$note" 2>&1>/dev/null
 }
 
 function cmd_ls()
 {
-  echo "$@"
+  $GIT ls-files
 }
 
 function cmd_encrypt()
@@ -159,7 +180,12 @@ function cmd_history()
   echo "$@"
 }
 
-function cmd_find()
+function cmd_ls()
+{
+  echo "$@"
+}
+
+function cmd_mv()
 {
   echo "$@"
 }
