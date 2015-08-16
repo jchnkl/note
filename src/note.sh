@@ -108,6 +108,30 @@ function cmd_add()
   $GIT commit -m "ADD:$note" 2>&1>/dev/null
 }
 
+function usage_cat()
+{
+  echo "$ARGV0 cat <note>"
+}
+
+function cmd_cat()
+{
+  if [ -z "$1" ]; then
+    echo -n "usage: "
+    usage_cat
+    exit_error
+  fi
+
+  local note=$1
+  local file="$GIT_WORK_TREE/$note"
+
+  if [ ! -f "$file" ]; then
+    echo "$note does not exist"
+    exit_error
+  fi
+
+  cat "$file"
+}
+
 function cmd_cp()
 {
   echo "$@"
@@ -225,6 +249,7 @@ function main()
 
   case "$1" in
     'add')     shift; cmd_add "$@"     ;;
+    'cat')     shift; cmd_cat "$@"     ;;
     'cp')      shift; cmd_cp "$@"      ;;
     'edit')    shift; cmd_edit "$@"    ;;
     'encrypt') shift; cmd_encrypt "$@" ;;
