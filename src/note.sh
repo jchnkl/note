@@ -35,6 +35,9 @@ function data_dir()
 
 function exit_error()
 {
+  if [ -n "$*" ]; then
+    echo -e "error: $*" 1>&2
+  fi
   exit 1
 }
 
@@ -51,8 +54,7 @@ function initialize()
     if [ $? -eq 0 ]; then
       echo -e "Initialized data directory\n"
     else
-      echo -e "Error: data directory was not initialized properly\n"
-      exit_error
+      exit_error "Error: data directory was not initialized properly\n"
     fi
 
     cat > "$GIT_WORK_TREE/.gitignore" << EOF
@@ -66,12 +68,10 @@ EOF
 function sanity_check()
 {
   if [ ! -x "$(which $GIT 2>/dev/null)" ]; then
-    echo "Can't find $GIT in \$PATH"
-    exit_error
+    exit_error "Can't find $GIT in \$PATH"
   fi
   if [ ! -x "$(which $GPG 2>/dev/null)" ]; then
-    echo "Can't find $GPG in \$PATH"
-    exit_error
+    exit_error "Can't find $GPG in \$PATH"
   fi
   if [ ! -x "$(which $LS 2>/dev/null)" ]; then
     LS="git ls-files"
@@ -104,8 +104,7 @@ function cmd_add()
   local file="$GIT_WORK_TREE/$dir/$note"
 
   if [ -f "$file" ]; then
-    echo "$note already exists!"
-    exit_error
+    exit_error "$note already exists!"
   fi
 
   mkdir -p "$GIT_WORK_TREE/$dir"
@@ -113,8 +112,7 @@ function cmd_add()
   shift
 
   if [ -d "$file" ]; then
-    echo "$dir/$note is a directory"
-    exit_error
+    exit_error "$dir/$note is a directory"
   fi
 
   if read -t 0; then
@@ -144,11 +142,9 @@ function cmd_cat()
   local file="$GIT_WORK_TREE/$note"
 
   if [ -d "$file" ]; then
-    echo "$note is a directory"
-    exit_error
+    exit_error "$note is a directory"
   elif [ ! -f "$file" ]; then
-    echo "$note does not exist"
-    exit_error
+    exit_error "$note does not exist"
   fi
 
   cat "$file"
@@ -214,8 +210,7 @@ function cmd_ls()
   elif [ -f "$fpath" -o -d "$fpath" ]; then
     $LS "$fpath"
   else
-    echo "$fpath does not exist"
-    exit_error
+    exit_error "$fpath does not exist"
   fi
 }
 
