@@ -143,7 +143,10 @@ function cmd_cat()
   local note=$1
   local file="$GIT_WORK_TREE/$note"
 
-  if [ ! -f "$file" ]; then
+  if [ -d "$file" ]; then
+    echo "$note is a directory"
+    exit_error
+  elif [ ! -f "$file" ]; then
     echo "$note does not exist"
     exit_error
   fi
