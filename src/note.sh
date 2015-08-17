@@ -46,6 +46,13 @@ function exit_success()
   exit 0
 }
 
+function git_add()
+{
+  $GIT add "$1" 2>&1>/dev/null
+  shift
+  $GIT commit -m "$@" 2>&1>/dev/null
+}
+
 function initialize()
 {
   if [ ! -d "$GIT_DIR" ]; then
