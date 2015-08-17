@@ -106,17 +106,27 @@ function usage_common()
 
 function usage_add()
 {
-  echo "add <note>"
+  echo "add <name> [<notes>...]"
+  echo "$ARGV0 add <name> << <notes>"
+  echo "$ARGV0 add [-f|--force] <src> [<dst>]"
 }
 
 function cmd_add()
 {
-  if [ -z "$1" ]; then
+  if [ ${#@} -lt 1 ]; then
     usage_common
     usage_add
     exit_error
   fi
+  if [ "$1" = "-f" -o -e "$1" ]; then
+    cmd_add_from_file "$@"
+  else
+    cmd_add_new "$@"
+  fi
+}
 
+function cmd_add_new()
+{
   local dir="$(dirname $1)"
   local note="$(basename $1)"
   local file="$GIT_WORK_TREE/$dir/$note"
@@ -126,8 +136,6 @@ function cmd_add()
   fi
 
   mkdir -p "$GIT_WORK_TREE/$dir"
-
-  shift
 
   if [ -d "$file" ]; then
     exit_error "$dir/$note is a directory"
@@ -139,8 +147,39 @@ function cmd_add()
     echo "$*" > "$file"
   fi
 
-  $GIT add "$file" 2>&1>/dev/null
-  $GIT commit -m "ADD:$note" 2>&1>/dev/null
+  git_add "$file" "ADD:$note"
+}
+
+function cmd_add_from_file()
+{
+  local src=
+  local dst=
+  local force="-n"
+
+  if [ "$1" = "-f" -o "$1" = "--force" ]; then
+    src="$2"
+    dst="$3"
+    force="$1"
+  else
+    src="$1"
+    dst="$2"
+  fi
+
+  if [ -n "$dst" ]; then
+    check_sneaky_paths "$dst"
+  else
+    dst="$src"
+  fi
+
+  if [ "$force" = "-n" -a -e "$GIT_WORK_TREE/$dst" ]; then
+    exit_error "$dst already exists, not overwriting"
+  else
+    mkdir -p "$GIT_WORK_TREE/$(dirname $dst)"
+  fi
+
+  cp $force "$src" "$GIT_WORK_TREE/$dst"
+
+  git_add "$GIT_WORK_TREE/$dst" "ADD:$src:$dst"
 }
 
 function usage_cat()
