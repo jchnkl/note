@@ -290,16 +290,14 @@ function cmd_edit()
     exit_error
   fi
 
-  local note="$1"
-  local file="$GIT_WORK_TREE/$note"
+  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
 
-  if [ ! -f "$file" ]; then
-    cmd_add "$file"
+  if [ ! -f "$1" ]; then
+    cmd_add "$1"
   fi
 
-  $EDITOR "$file"
-  $GIT add "$file" 2>&1>/dev/null
-  $GIT commit -m "EDIT:$note" 2>&1>/dev/null
+  $EDITOR "$1"
+  git_add "$1" "EDIT:$1"
 }
 
 function cmd_encrypt()
