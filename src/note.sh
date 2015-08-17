@@ -166,13 +166,27 @@ function usage_cp()
   echo "cp [-r] [-f] <source> <destination>"
 }
 
-function cmd_cp()
+function usage_mv()
 {
+  echo "mv [-f] <source> <destination>"
+}
+
+function cmd_cp_mv()
+{
+  local cmd=$1
+  shift
+
   local opts=
-  local force="-n"
+  local force=
   local recursive=
 
-  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 cp" -- "$@")"
+  if [ "$cmd" = "cp" ]; then
+    force="-n"
+  else
+    force="-k"
+  fi
+
+  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 $cmd" -- "$@")"
 
   if [ $? -gt 0 ]; then
     exit_error
@@ -190,7 +204,11 @@ function cmd_cp()
 
   if [ ${#@} -ne 2 ]; then
     usage_common
-    usage_cp
+    if [ "$cmd" = "cp" ]; then
+      usage_cp
+    else
+      usage_mv
+    fi
     exit_error
   fi
 
@@ -200,18 +218,20 @@ function cmd_cp()
   check_sneaky_paths "$src"
   check_sneaky_paths "$dst"
 
-  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
-
-  cp -v $force $recursive "$src" "$dst"
+  if [ "$cmd" = "cp" ]; then
+    pushd "$GIT_WORK_TREE" 2>&1>/dev/null
+    cp -v $force $recursive "$src" "$dst"
+    popd 2>&1>/dev/null
+    $GIT add "$dst" 2>&1>/dev/null
+    $GIT commit -m "CP:$src:$dst" 2>&1>/dev/null
+  else
+    $GIT mv -v $force "$src" "$dst"
+    $GIT commit -m "MV:$src:$dst" 2>&1>/dev/null
+  fi
 
   if [ $? -gt 0 ]; then
     exit_error
   fi
-
-  popd 2>&1>/dev/null
-
-  $GIT add "$dst" 2>&1>/dev/null
-  $GIT commit -m "CP:$src:$dst" 2>&1>/dev/null
 }
 
 function usage_edit()
@@ -273,15 +293,6 @@ function cmd_ls()
   fi
 }
 
-function cmd_mv()
-{
-  echo "$@"
-}
-
-function cmd_mv()
-{
-  echo "$@"
-}
 
 function usage_rm()
 {
@@ -310,14 +321,14 @@ function usage()
   Usage:
     $ARGV0 add
     $ARGV0 cat
-    # $ARGV0 cp
+    $ARGV0 cp
     $ARGV0 edit
     # $ARGV0 encrypt
     # $ARGV0 find
     # $ARGV0 grep
     # $ARGV0 history
     $ARGV0 ls
-    # $ARGV0 mv
+    $ARGV0 mv
     $ARGV0 rm
 EOF
 }
@@ -330,18 +341,18 @@ function main()
   DBG_STATUS
 
   case "$1" in
-    'add')     shift; cmd_add "$@"     ;;
-    'cat')     shift; cmd_cat "$@"     ;;
-    'cp')      shift; cmd_cp "$@"      ;;
-    'edit')    shift; cmd_edit "$@"    ;;
-    'encrypt') shift; cmd_encrypt "$@" ;;
-    'find')    shift; cmd_find "$@"    ;;
-    'grep')    shift; cmd_grep "$@"    ;;
-    'history') shift; cmd_history "$@" ;;
-    'ls')      shift; cmd_ls "$@"      ;;
-    'mv')      shift; cmd_mv "$@"      ;;
-    'rm')      shift; cmd_rm "$@"      ;;
-    *)                usage            ;;
+    'add')     shift; cmd_add "$@"        ;;
+    'cat')     shift; cmd_cat "$@"        ;;
+    'cp')      shift; cmd_cp_mv "cp" "$@" ;;
+    'edit')    shift; cmd_edit "$@"       ;;
+    'encrypt') shift; cmd_encrypt "$@"    ;;
+    'find')    shift; cmd_find "$@"       ;;
+    'grep')    shift; cmd_grep "$@"       ;;
+    'history') shift; cmd_history "$@"    ;;
+    'ls')      shift; cmd_ls "$@"         ;;
+    'mv')      shift; cmd_cp_mv "mv" "$@" ;;
+    'rm')      shift; cmd_rm "$@"         ;;
+    *)                usage               ;;
   esac
 }
 
