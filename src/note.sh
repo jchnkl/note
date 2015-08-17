@@ -402,6 +402,39 @@ function cmd_rm()
   $GIT commit -m "RM:$note" 2>&1>/dev/null
 }
 
+function usage_tee()
+{
+  echo "tee [-a|--append] <note>"
+}
+
+function cmd_tee()
+{
+  local opts=
+  local append=
+
+  opts="$($GETOPT -o "a" -l "append" -n "$ARGV0 tee" -- "$@")"
+  guard_return
+
+  eval set -- "$opts"
+  while true; do
+    case "$1" in
+      -a|--append) append="-a"; shift ;;
+      --) shift; break ;;
+    esac
+  done
+
+  guard_usage usage_tee 1 1 $@
+
+  is_note $1 || exit_error
+
+  push_work_tree
+
+  if read -t 0; then
+    tee $append "$1" 2>&1>/dev/null
+    git_add "$1" "TEE:$1"
+  fi
+}
+
 function usage()
 {
   cat << EOF
@@ -417,6 +450,7 @@ function usage()
     $ARGV0 ls
     $ARGV0 mv
     $ARGV0 rm
+    $ARGV0 tee
 EOF
 }
 
@@ -439,6 +473,7 @@ function main()
     'ls')      shift; cmd_ls "$@"         ;;
     'mv')      shift; cmd_cp_mv "mv" "$@" ;;
     'rm')      shift; cmd_rm "$@"         ;;
+    'tee')     shift; cmd_tee "$@"        ;;
     *)                usage               ;;
   esac
 }
