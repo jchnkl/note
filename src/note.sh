@@ -54,6 +54,51 @@ function git_add()
   $GIT commit -m "$@" 2>&1>/dev/null
 }
 
+function note_exists()
+{
+  if [ -f "$GIT_WORK_TREE/$1" ]; then
+    echo "return 1"
+    return 1
+  else
+    echo "return 0"
+    return 0
+  fi
+}
+
+function is_directory()
+{
+  if [ -d "$GIT_WORK_TREE/$1" ]; then
+    echo "return 1"
+    return 1
+  else
+    echo "return 0"
+    return 0
+  fi
+}
+
+function guard_return_code()
+{
+  DBG_PRINT "guard_return_code"
+  if [ $? -gt 0 ]; then
+    exit_error
+  fi
+}
+
+function guard_usage()
+{
+  local msg=$1
+  shift
+  local min=$1
+  shift
+  local max=$1
+  shift
+
+  if [ ${#@} -lt $min -o ${#@} -gt $max ]; then
+    echo 'usage:'
+    eval $msg
+  fi
+}
+
 function initialize()
 {
   if [ ! -d "$GIT_DIR" ]; then
@@ -100,6 +145,11 @@ function usage_common()
 {
   echo "usage:"
   echo -en "$ARGV0 "
+}
+
+function push_work_tree()
+{
+  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
 }
 
 ### PUBLIC CMDS
