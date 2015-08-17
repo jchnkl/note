@@ -184,27 +184,23 @@ function cmd_add_from_file()
 
 function usage_cat()
 {
-  echo "cat <note>"
+  echo "cat <notes>..."
 }
 
 function cmd_cat()
 {
-  if [ -z "$1" ]; then
+  if [ ${#@} -lt 1 ]; then
     usage_common
     usage_cat
     exit_error
   fi
 
-  local note=$1
-  local file="$GIT_WORK_TREE/$note"
+  for p in $@; do
+    check_sneaky_paths $p
+  done
 
-  if [ -d "$file" ]; then
-    exit_error "$note is a directory"
-  elif [ ! -f "$file" ]; then
-    exit_error "$note does not exist"
-  fi
-
-  cat "$file"
+  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
+  cat $@
 }
 
 function usage_cp()
