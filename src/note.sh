@@ -2,7 +2,7 @@
 
 DEBUG=${DEBUG:-0}
 
-LS=${LS:-tree --noreport}
+LS=${LS:-tree -C --noreport}
 EDITOR=${EDITOR:-vi}
 GETOPT=${GETOPT:-getopt}
 
@@ -330,15 +330,16 @@ function cmd_ls()
 {
   local fpath="$GIT_WORK_TREE/$1"
 
-  if [ -z "$fpath" ]; then
-    $LS
+  if [ -z "$1" ]; then
+    echo "Notes"
   elif [ -f "$fpath" -o -d "$fpath" ]; then
-    $LS "$fpath"
+    echo "${1%\/}"
   else
-    exit_error "$fpath does not exist"
+    exit_error "$1 does not exist"
   fi
-}
 
+  $LS "$fpath" | tail -n +2
+}
 
 function usage_rm()
 {
