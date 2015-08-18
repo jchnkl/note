@@ -129,7 +129,7 @@ function sanity_check()
   fi
 }
 
-function check_sneaky_paths()
+function guard_sneaky_paths()
 {
   local path
   for path in "$@"; do
@@ -214,7 +214,7 @@ function cmd_add_from_file()
   fi
 
   if [ -n "$dst" ]; then
-    check_sneaky_paths "$dst"
+    guard_sneaky_paths "$dst"
   else
     dst="$src"
   fi
@@ -244,7 +244,7 @@ function cmd_cat()
   fi
 
   for p in $@; do
-    check_sneaky_paths $p
+    guard_sneaky_paths $p
   done
 
   pushd "$GIT_WORK_TREE" 2>&1>/dev/null
@@ -305,8 +305,8 @@ function cmd_cp_mv()
   local src="$1"
   local dst="$2"
 
-  check_sneaky_paths "$src"
-  check_sneaky_paths "$dst"
+  guard_sneaky_paths "$src"
+  guard_sneaky_paths "$dst"
 
   if [ "$cmd" = "cp" ]; then
     pushd "$GIT_WORK_TREE" 2>&1>/dev/null
