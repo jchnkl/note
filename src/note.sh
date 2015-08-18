@@ -82,7 +82,7 @@ function guard_return()
 
 function guard_usage()
 {
-  local msg=$1
+  local fun=$1
   shift
   local min=$1
   shift
@@ -90,8 +90,10 @@ function guard_usage()
   shift
 
   if [ ${#@} -lt $min -o ${#@} -gt $max ]; then
-    echo 'usage:'
-    eval $msg
+    echo "error: not enough parameters for $fun" >&2
+    echo -n "usage: " >&2
+    eval "usage_$fun" >&2
+    exit_error
   fi
 }
 
@@ -423,7 +425,7 @@ function cmd_tee()
     esac
   done
 
-  guard_usage usage_tee 1 1 $@
+  guard_usage "tee" 1 1 $@
 
   is_note $1 || exit_error
 
