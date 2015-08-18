@@ -265,13 +265,9 @@ function usage_edit()
 
 function cmd_edit()
 {
-  if [ -z "$1" ]; then
-    usage_common
-    usage_edit
-    exit_error
-  fi
+  guard_usage "edit" 1 1 $@
 
-  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
+  push_work_tree
 
   if [ ! -f "$1" ]; then
     cmd_add "$1"
