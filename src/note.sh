@@ -154,44 +154,36 @@ function push_work_tree()
 
 function usage_add()
 {
-  echo "add <name> [<notes>...]"
+  echo "$ARGV0 add <name> [[..]]"
   echo "$ARGV0 add <name> << <notes>"
 }
 
 function cmd_add()
 {
-  if [ ${#@} -lt 1 ]; then
-    usage_common
-    usage_add
-    exit_error
-  fi
+  guard_usage "add" 1 -1 "$@"
 
-  cmd_add_new "$@"
-}
+  guard_sneaky_paths "$1"
 
-function cmd_add_new()
-{
+  push_work_tree
+
   local dir="$(dirname $1)"
   local note="$(basename $1)"
-  local file="$GIT_WORK_TREE/$dir/$note"
 
-  if [ -f "$file" ]; then
-    exit_error "$note already exists!"
+  if [ -e "$1" ]; then
+    exit_error "$1 already exists!"
   fi
 
-  mkdir -p "$GIT_WORK_TREE/$dir"
-
-  if [ -d "$file" ]; then
-    exit_error "$dir/$note is a directory"
+  if [ -n "$dir" ]; then
+    mkdir -p "$dir"
   fi
 
   if read -t 0; then
-    cat > "$file"
+    cat > "$1"
   else
-    echo "$*" > "$file"
+    echo "$*" > "$1"
   fi
 
-  git_add "$file" "ADD:$note"
+  git_add "$1" "ADD:$1"
 }
 
 function usage_cat()
