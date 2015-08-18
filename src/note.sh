@@ -188,22 +188,19 @@ function cmd_add()
 
 function usage_cat()
 {
-  echo "cat <notes>..."
+  echo "cat <note> [<notes>]"
 }
 
 function cmd_cat()
 {
-  if [ ${#@} -lt 1 ]; then
-    usage_common
-    usage_cat
-    exit_error
-  fi
+  guard_usage "cat" 1 -1 $@
 
   for p in $@; do
     guard_sneaky_paths $p
   done
 
-  pushd "$GIT_WORK_TREE" 2>&1>/dev/null
+  push_work_tree
+
   cat $@
 }
 
