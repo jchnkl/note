@@ -225,18 +225,12 @@ function cmd_cp_mv()
 
   if [ "$cmd" = "cp" ]; then
     force="-n"
-  else
-    force="-k"
   fi
 
   opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 $cmd" -- "$@")"
-
-  if [ $? -gt 0 ]; then
-    exit_error
-  fi
+  guard_return
 
   eval set -- "$opts"
-
   while true; do
     case "$1" in
       -f|--force) force="-f"; shift ;;
@@ -245,36 +239,22 @@ function cmd_cp_mv()
     esac
   done
 
-  if [ ${#@} -ne 2 ]; then
-    usage_common
-    if [ "$cmd" = "cp" ]; then
-      usage_cp
-    else
-      usage_mv
-    fi
-    exit_error
-  fi
+  guard_usage $cmd 2 2 $@
 
-  local src="$1"
-  local dst="$2"
 
-  guard_sneaky_paths "$src"
-  guard_sneaky_paths "$dst"
+  guard_sneaky_paths "$1"
+  guard_sneaky_paths "$2"
+
+  push_work_tree
 
   if [ "$cmd" = "cp" ]; then
-    pushd "$GIT_WORK_TREE" 2>&1>/dev/null
-    cp -v $force $recursive "$src" "$dst"
-    popd 2>&1>/dev/null
+    cp -v $force $recursive "$1" "$2"
     $GIT add "$dst" 2>&1>/dev/null
-    $GIT commit -m "CP:$src:$dst" 2>&1>/dev/null
   else
-    $GIT mv -v $force "$src" "$dst"
-    $GIT commit -m "MV:$src:$dst" 2>&1>/dev/null
+    $GIT mv -v $force "$1" "$2"
   fi
 
-  if [ $? -gt 0 ]; then
-    exit_error
-  fi
+  $GIT commit -m "${cmd^^*}:$1:$2" 2>&1>/dev/null
 }
 
 function usage_edit()
