@@ -89,7 +89,7 @@ function guard_usage()
   local max=$1
   shift
 
-  if [ ${#@} -lt $min -o ${#@} -gt $max ]; then
+  if [ ${#@} -lt $min -o \( $max -ne -1 -a ${#@} -gt $max \) ]; then
     echo "error: not enough parameters for $fun" >&2
     echo -n "usage: " >&2
     eval "usage_$fun" >&2
