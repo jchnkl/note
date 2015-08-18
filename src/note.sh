@@ -166,11 +166,8 @@ function cmd_add()
     usage_add
     exit_error
   fi
-  if [ "$1" = "-f" -o -e "$1" ]; then
-    cmd_add_from_file "$@"
-  else
-    cmd_add_new "$@"
-  fi
+
+  cmd_add_new "$@"
 }
 
 function cmd_add_new()
@@ -196,38 +193,6 @@ function cmd_add_new()
   fi
 
   git_add "$file" "ADD:$note"
-}
-
-function cmd_add_from_file()
-{
-  local src=
-  local dst=
-  local force="-n"
-
-  if [ "$1" = "-f" -o "$1" = "--force" ]; then
-    src="$2"
-    dst="$3"
-    force="$1"
-  else
-    src="$1"
-    dst="$2"
-  fi
-
-  if [ -n "$dst" ]; then
-    guard_sneaky_paths "$dst"
-  else
-    dst="$src"
-  fi
-
-  if [ "$force" = "-n" -a -e "$GIT_WORK_TREE/$dst" ]; then
-    exit_error "$dst already exists, not overwriting"
-  else
-    mkdir -p "$GIT_WORK_TREE/$(dirname $dst)"
-  fi
-
-  cp $force "$src" "$GIT_WORK_TREE/$dst"
-
-  git_add "$GIT_WORK_TREE/$dst" "ADD:$src:$dst"
 }
 
 function usage_cat()
@@ -363,6 +328,48 @@ function cmd_grep()
   echo "$@"
 }
 
+function usage_import()
+{
+  echo "$ARGV0 import [-f|--force] [-r|--recursive] <src> [<dst>]"
+}
+
+function cmd_import()
+{
+  local opts=
+  local force=
+  local recursive=
+
+  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 $cmd" -- "$@")"
+  guard_return
+
+  eval set -- "$opts"
+  while true; do
+    case "$1" in
+      -f|--force) force="-f"; shift ;;
+      -r|--recursive) recursive="-r"; shift ;;
+      --) shift; break ;;
+    esac
+  done
+
+  guard_usage "import" 1 2 $@
+
+  local src="$(realpath $1)"
+  local dst="$2"
+
+  if [ -z "$dst" ]; then
+    dst="$(basename $1)"
+  fi
+
+  guard_sneaky_paths "$dst"
+
+  push_work_tree
+
+  cp -v $force $recursive "$src" "$dst"
+  guard_return
+
+  git_add "$dst" "IMPORT:$src:$dst"
+}
+
 function usage_ls()
 {
   echo "ls [<path>]"
@@ -449,6 +456,7 @@ function usage()
     # $ARGV0 find
     # $ARGV0 grep
     # $ARGV0 history
+    $ARGV0 import
     $ARGV0 ls
     $ARGV0 mv
     $ARGV0 rm
@@ -472,6 +480,7 @@ function main()
     'find')    shift; cmd_find "$@"       ;;
     'grep')    shift; cmd_grep "$@"       ;;
     'history') shift; cmd_history "$@"    ;;
+    'import')  shift; cmd_import "$@"     ;;
     'ls')      shift; cmd_ls "$@"         ;;
     'mv')      shift; cmd_cp_mv "mv" "$@" ;;
     'rm')      shift; cmd_rm "$@"         ;;
