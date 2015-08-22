@@ -284,9 +284,21 @@ function cmd_encrypt()
   echo "$@"
 }
 
+function usage_find()
+{
+  echo "find [find(1) options] <note>"
+}
+
 function cmd_find()
 {
-  echo "$@"
+  guard_usage "find" 1 -1 $@
+
+  local -a args=($@)
+  guard_sneaky_paths "${args[-1]}"
+
+  push_work_tree
+
+  find . $@
 }
 
 function cmd_grep()
