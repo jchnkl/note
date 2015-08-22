@@ -289,9 +289,26 @@ function cmd_find()
   echo "$@"
 }
 
+function grep_usage()
+{
+  echo "grep [grep(1) options] <note>"
+}
+
 function cmd_grep()
 {
-  echo "$@"
+  guard_usage "grep" 1 -1 $@
+
+  local -a args=($@)
+  local note="${args[-1]}"
+
+  guard_sneaky_paths "$note"
+
+  # is_note "$note" || is_directory "$note" \
+  #   || exit_error "$note does not exist nor is it a directory"
+
+  push_work_tree
+
+  grep $@
 }
 
 function usage_import()
