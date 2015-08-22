@@ -375,6 +375,20 @@ function cmd_rm()
   $GIT commit -m "RM:$note" 2>&1>/dev/null
 }
 
+function usage_show()
+{
+  echo "show [-f|--format] [<path>]"
+}
+
+function cmd_show()
+{
+  local opts=
+  local format=
+
+  opts="$($GETOPT -o "a" -l "append" -n "$ARGV0 tee" -- "$@")"
+  guard_return
+}
+
 function usage_tee()
 {
   echo "tee [-a|--append] <note>"
