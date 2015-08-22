@@ -305,7 +305,7 @@ function cmd_import()
   local force=
   local recursive=
 
-  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 $cmd" -- "$@")"
+  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 import" -- "$@")"
   guard_return
 
   eval set -- "$opts"
