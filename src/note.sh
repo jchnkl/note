@@ -267,6 +267,8 @@ function cmd_edit()
 {
   guard_usage "edit" 1 1 $@
 
+  guard_sneaky_paths "$1"
+
   push_work_tree
 
   if [ ! -f "$1" ]; then
