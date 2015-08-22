@@ -358,22 +358,36 @@ function cmd_ls()
 
 function usage_rm()
 {
-  echo "$ARGV0 rm [-f] <note>"
+  echo "$ARGV0 rm [-f|--force] [-r|--recursive] <note>"
 }
 
 function cmd_rm()
 {
-  if [ -z "$1" ]; then
-    echo -n "usage: "
-    usage_rm
-    exit_error
-  fi
+  guard_usage "rm" 1 1 $@
 
+  local opts=
   local force=
-  local note=$1
-  local file="$GIT_WORK_TREE/$note"
+  local recursive=
 
-  $GIT rm $force "$file" 2>&1>/dev/null
+  opts="$($GETOPT -o "f r" -l "force recursive" -n "$ARGV0 rm" -- "$@")"
+  guard_return
+
+  eval set -- "$opts"
+  while true; do
+    case "$1" in
+      -f|--force) force="-f"; shift ;;
+      -r|--recursive) recursive="-r"; shift ;;
+      --) shift; break ;;
+    esac
+  done
+
+  local note="$1"
+
+  guard_sneaky_paths "$note"
+
+  push_work_tree
+
+  $GIT rm $force $recursive "$note" 2>&1>/dev/null
   $GIT commit -m "RM:$note" 2>&1>/dev/null
 }
 
