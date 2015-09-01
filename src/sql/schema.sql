@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS info(
   title TEXT
 );
 
+/* Table for note diffs to track changes */
+CREATE TABLE IF NOT EXISTS diff(
+  id   CHAR(65) NOT NULL,
+  date CHAR(25) NOT NULL,
+  diff BLOB,
+  FOREIGN KEY(id) REFERENCES info(id)
 );
 
 /* Table for the actual note */
