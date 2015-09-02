@@ -1,0 +1,5 @@
+*.db
+*.sw[op]
+cabal.sandbox.config
+tags
+dist/
