@@ -1,5 +1,5 @@
 -- (id, date, title)
 -- id = sha256 (unique)
 -- date = date -I seconds
--- title = freeform text
+-- content = freeform text
 INSERT INTO info VALUES(?, ?, ?);

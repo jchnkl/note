@@ -14,3 +14,8 @@ mkSqlInsert :: Q [Dec]
 mkSqlInsert = do
     insert <- runIO $ readFile "src/sql/insert.sql"
     [d|sqlInsert = insert|]
+
+mkSqlLookup :: Q [Dec]
+mkSqlLookup = do
+    lookup <- runIO $ readFile "src/sql/lookup.sql"
+    [d|sqlLookup = lookup|]

@@ -21,10 +21,16 @@ executable note
   -- other-extensions:    
 
   build-depends:       base >=4.8 && <4.9,
-                       filepath,
+                       mtl,
                        transformers,
+                       binary,
+                       filepath,
                        template-haskell,
+                       bytestring,
+                       convertible,
                        exceptions,
+                       time,
+                       SHA,
                        HDBC,
                        HDBC-sqlite3
 
